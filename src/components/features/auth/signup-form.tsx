@@ -2,12 +2,16 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signupApi } from "@/lib/api/auth";
+import { ApiClientError } from "@/lib/api/client";
 import { AuthAlertBanner } from "./auth-alert-banner";
 import { PasswordInput } from "./password-input";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function SignupForm() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +26,7 @@ export function SignupForm() {
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBanner(null);
 
@@ -30,8 +34,8 @@ export function SignupForm() {
     const trimmedName = name.trim();
     const trimmedEmail = email.trim();
 
-    if (!trimmedName) {
-      nextErrors.name = "Full name is required";
+    if (!trimmedName || trimmedName.length < 2) {
+      nextErrors.name = "Full name is required (at least 2 characters)";
     } else if (trimmedName.length > 120) {
       nextErrors.name = "Name must be at most 120 characters";
     }
@@ -52,15 +56,42 @@ export function SignupForm() {
     setFieldErrors({});
     setIsSubmitting(true);
 
-    // UI-only preview feedback until Phase 1B Step 2 backend API is connected
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setBanner({
-        variant: "success",
-        message:
-          "Sign-up UI validated. Account creation API will be connected in Step 2.",
+    try {
+      const result = await signupApi({
+        name: trimmedName,
+        email: trimmedEmail,
+        password,
       });
-    }, 600);
+
+      const targetRoute = result.data.hasWedding ? "/app" : "/create-wedding";
+      router.push(targetRoute);
+      router.refresh();
+    } catch (error) {
+      setIsSubmitting(false);
+      if (error instanceof ApiClientError) {
+        if (error.details) {
+          setFieldErrors({
+            name: error.details.name,
+            email: error.details.email,
+            password: error.details.password,
+          });
+        } else if (error.code === "EMAIL_ALREADY_EXISTS") {
+          setFieldErrors({
+            email: error.message,
+          });
+        }
+        setBanner({
+          variant: "error",
+          message: error.message,
+        });
+        return;
+      }
+
+      setBanner({
+        variant: "error",
+        message: "Unable to create your account right now. Please try again.",
+      });
+    }
   }
 
   const getInputClass = (hasError: boolean) =>
@@ -242,4 +273,3 @@ export function SignupForm() {
     </div>
   );
 }
-

@@ -2681,5 +2681,5 @@ cache is stored in localStorage.
 
 Verification: `npm test` uses mocked persistence/storage and component tests.
 `RUN_R2_SMOKE=1 npm test -- src/server/storage/r2.integration.test.ts` explicitly
-loads `.env.local`, refuses any bucket other than make-my-marriage-dev, and
+loads `.env.local`, refuses any bucket other than wedora-dev, and
 uploads/reads/deletes only a unique test-fixtures prefix. It never uses MongoDB.

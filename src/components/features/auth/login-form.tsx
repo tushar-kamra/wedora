@@ -2,12 +2,16 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { loginApi } from "@/lib/api/auth";
+import { ApiClientError } from "@/lib/api/client";
 import { AuthAlertBanner } from "./auth-alert-banner";
 import { PasswordInput } from "./password-input";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function LoginForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<{
@@ -20,7 +24,7 @@ export function LoginForm() {
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBanner(null);
 
@@ -42,15 +46,36 @@ export function LoginForm() {
     setFieldErrors({});
     setIsSubmitting(true);
 
-    // UI-only preview feedback until Phase 1B Step 2 backend API is connected
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setBanner({
-        variant: "success",
-        message:
-          "Sign-in UI validated. Authentication API will be connected in Step 2.",
+    try {
+      const result = await loginApi({
+        email: trimmedEmail,
+        password,
       });
-    }, 600);
+
+      const targetRoute = result.data.hasWedding ? "/app" : "/create-wedding";
+      router.push(targetRoute);
+      router.refresh();
+    } catch (error) {
+      setIsSubmitting(false);
+      if (error instanceof ApiClientError) {
+        if (error.details) {
+          setFieldErrors({
+            email: error.details.email,
+            password: error.details.password,
+          });
+        }
+        setBanner({
+          variant: "error",
+          message: error.message,
+        });
+        return;
+      }
+
+      setBanner({
+        variant: "error",
+        message: "Unable to sign in right now. Please try again.",
+      });
+    }
   }
 
   const emailInputClass = fieldErrors.email
@@ -192,4 +217,3 @@ export function LoginForm() {
     </div>
   );
 }
-

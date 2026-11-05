@@ -402,7 +402,7 @@ After signup/login, backend sets a secure cookie.
 Example conceptual name:
 
 ```text
-mmm_session
+wedora_session
 ```
 
 Properties:

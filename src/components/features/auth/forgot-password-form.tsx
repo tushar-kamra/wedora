@@ -2,6 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import { forgotPasswordApi } from "@/lib/api/auth";
+import { ApiClientError } from "@/lib/api/client";
 import { AuthAlertBanner } from "./auth-alert-banner";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -9,11 +11,15 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState<string | undefined>();
-  const [submitted, setSubmitted] = useState(false);
+  const [banner, setBanner] = useState<{
+    variant: "error" | "success";
+    message: string;
+  } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setBanner(null);
     const trimmedEmail = email.trim();
 
     if (!trimmedEmail || !EMAIL_PATTERN.test(trimmedEmail)) {
@@ -24,10 +30,32 @@ export function ForgotPasswordForm() {
     setEmailError(undefined);
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      await forgotPasswordApi({ email: trimmedEmail });
       setIsSubmitting(false);
-      setSubmitted(true);
-    }, 600);
+      setBanner({
+        variant: "success",
+        message:
+          "If an account exists for that email address, we've sent instructions to reset your password.",
+      });
+    } catch (error) {
+      setIsSubmitting(false);
+      if (error instanceof ApiClientError) {
+        if (error.details?.email) {
+          setEmailError(error.details.email);
+        }
+        setBanner({
+          variant: "error",
+          message: error.message,
+        });
+        return;
+      }
+
+      setBanner({
+        variant: "error",
+        message: "Unable to process your request right now. Please try again.",
+      });
+    }
   }
 
   const emailInputClass = emailError
@@ -51,11 +79,11 @@ export function ForgotPasswordForm() {
         </p>
       </div>
 
-      {submitted ? (
+      {banner ? (
         <AuthAlertBanner
-          variant="success"
-          icon="mark_email_read"
-          message="If an account exists for that email address, we've sent instructions to reset your password."
+          variant={banner.variant}
+          icon={banner.variant === "success" ? "mark_email_read" : undefined}
+          message={banner.message}
         />
       ) : null}
 
@@ -148,4 +176,3 @@ export function ForgotPasswordForm() {
     </div>
   );
 }
-

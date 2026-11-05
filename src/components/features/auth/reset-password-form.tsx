@@ -2,11 +2,14 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { resetPasswordApi } from "@/lib/api/auth";
+import { ApiClientError } from "@/lib/api/client";
 import { AuthAlertBanner } from "./auth-alert-banner";
 import { PasswordInput } from "./password-input";
 
 export function ResetPasswordForm() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token")?.trim() ?? "";
 
@@ -22,7 +25,7 @@ export function ResetPasswordForm() {
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBanner(null);
 
@@ -51,14 +54,42 @@ export function ResetPasswordForm() {
     setFieldErrors({});
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      await resetPasswordApi({
+        token,
+        password,
+      });
+
       setIsSubmitting(false);
+      setPassword("");
+      setConfirmPassword("");
       setBanner({
         variant: "success",
         message:
-          "Password reset UI validated. Reset API will be connected in Step 2.",
+          "Your password has been updated. Redirecting you to sign in...",
       });
-    }, 600);
+
+      setTimeout(() => {
+        router.push("/login");
+      }, 1500);
+    } catch (error) {
+      setIsSubmitting(false);
+      if (error instanceof ApiClientError) {
+        if (error.details?.password) {
+          setFieldErrors({ password: error.details.password });
+        }
+        setBanner({
+          variant: "error",
+          message: error.message,
+        });
+        return;
+      }
+
+      setBanner({
+        variant: "error",
+        message: "Unable to reset password right now. Please try again.",
+      });
+    }
   }
 
   return (
@@ -180,4 +211,3 @@ export function ResetPasswordForm() {
     </div>
   );
 }
-
