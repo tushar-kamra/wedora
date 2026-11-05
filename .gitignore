@@ -25,3 +25,8 @@ coverage/
 next-env.d.ts
 *.tsbuildinfo
 
+# Local Editor & MCP Secrets
+.vscode/mcp.json
+.agents/plugins/stitch/mcp_config.json
+
+
