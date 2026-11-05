@@ -10,7 +10,7 @@
 | :--- | :--- | :---: | :---: | :---: | :--- |
 | **Phase 0** | Architecture Review & Folder Structure | ✅ Done | ✅ Done | ✅ Done | 10 domain modules, Next.js App Router, config & dependencies installed |
 | **Phase 1A** | Marketing Landing Page (`/`) & Global Design Tokens | ✅ Done | N/A | N/A | Built from Stitch screen `d1404416fd8c454f80ea3eea4be6e73f` |
-| **Phase 1B** | Authentication (`login`, `signup`, `forgot/reset-password`, `me`, `logout`) | ⏳ Next | ⏳ Pending | ⏳ Pending | Stitch Sign In screen `8730c8b34c394d2b8bbdd092b51db69d` available |
+| **Phase 1B** | Authentication (`login`, `signup`, `forgot/reset-password`, `me`, `logout`) | ✅ Done | ⏳ Next | ⏳ Pending | `/login`, `/signup`, `/forgot-password`, `/reset-password` UI built from Stitch `8730c8b34c394d2b8bbdd092b51db69d` |
 | **Phase 2** | Wedding Setup (`/create-wedding`), Dashboard Shell & Members | ⏳ Pending | ⏳ Pending | ⏳ Pending | Atomic Wedding + `ADMIN` membership creation |
 | **Phase 3** | Events & Tasks Management | ⏳ Pending | ⏳ Pending | ⏳ Pending | Event archiving (`archivedAt`), Task filters & concurrency check |
 | **Phase 4** | Guests, Invitations, Public RSVP (`/invite/[token]`) & Email Jobs | ⏳ Pending | ⏳ Pending | ⏳ Pending | 32-byte stable `invitationToken`, rate-limited public RSVP, Cron worker |
@@ -40,7 +40,7 @@ Configured globally so all new pages and components automatically inherit the **
 - **Stitch Project:** `projects/15003352521024248804` (*Wedora Landing Page*)
 - **Available Stitch Screens:**
   1. **Desktop SaaS Landing Page:** `d1404416fd8c454f80ea3eea4be6e73f` — **Implemented** at `/`
-  2. **Sign In Screen (Validated):** `8730c8b34c394d2b8bbdd092b51db69d` — **Ready for `/login` UI implementation**
+  2. **Sign In Screen (Validated):** `8730c8b34c394d2b8bbdd092b51db69d` — **Implemented** across `/login`, `/signup`, `/forgot-password`, `/reset-password`
 
 ### 2.3 Implemented Frontend Routes & Components
 - **`/` (Marketing Landing Page):** [`src/app/(marketing)/page.tsx`](../src/app/(marketing)/page.tsx)
@@ -51,6 +51,15 @@ Configured globally so all new pages and components automatically inherit the **
   - [`src/components/features/marketing/how-it-works-section.tsx`](../src/components/features/marketing/how-it-works-section.tsx) — 3-step onboarding cards.
   - [`src/components/features/marketing/impact-section.tsx`](../src/components/features/marketing/impact-section.tsx) — Metrics & verified couple testimonial card.
   - [`src/components/features/marketing/cta-and-footer-section.tsx`](../src/components/features/marketing/cta-and-footer-section.tsx) — Plum CTA banner & 4-column footer.
+- **Authentication Routes (`/login`, `/signup`, `/forgot-password`, `/reset-password`):**
+  - [`src/app/(auth)/layout.tsx`](../src/app/(auth)/layout.tsx) — Shared 2-column split auth shell (`45%` form card + `55%` `AuthEditorialPanel`) with top header and `Back to Home` link.
+  - [`src/components/features/auth/auth-editorial-panel.tsx`](../src/components/features/auth/auth-editorial-panel.tsx) — Stitch right-column editorial showcase (`Celebration Countdown`, `Guest RSVP Response`, `Key Itinerary Moments`).
+  - [`src/components/features/auth/auth-alert-banner.tsx`](../src/components/features/auth/auth-alert-banner.tsx) — Reusable muted rose error banner & plum success status banner.
+  - [`src/components/features/auth/password-input.tsx`](../src/components/features/auth/password-input.tsx) — Reusable password field with visibility toggle (`visibility` / `visibility_off`), hint, error ring, and optional `Forgot password?` link.
+  - [`src/app/(auth)/login/page.tsx`](../src/app/(auth)/login/page.tsx) & [`src/components/features/auth/login-form.tsx`](../src/components/features/auth/login-form.tsx) — Sign In screen.
+  - [`src/app/(auth)/signup/page.tsx`](../src/app/(auth)/signup/page.tsx) & [`src/components/features/auth/signup-form.tsx`](../src/components/features/auth/signup-form.tsx) — Sign Up screen (`Full Name`, `Email`, `Password`).
+  - [`src/app/(auth)/forgot-password/page.tsx`](../src/app/(auth)/forgot-password/page.tsx) & [`src/components/features/auth/forgot-password-form.tsx`](../src/components/features/auth/forgot-password-form.tsx) — Account recovery request screen.
+  - [`src/app/(auth)/reset-password/page.tsx`](../src/app/(auth)/reset-password/page.tsx) & [`src/components/features/auth/reset-password-form.tsx`](../src/components/features/auth/reset-password-form.tsx) — Token-based password reset screen.
 
 ### 2.4 Backend Modules & Infrastructure
 - Folder hierarchy is scaffolded under `src/app/api/`, `src/modules/`, `src/server/`, `src/lib/`, `src/types/`, and `tests/`.
@@ -78,4 +87,7 @@ Configured globally so all new pages and components automatically inherit the **
   - Connected Google Stitch MCP via `.agents/plugins/stitch/` and ignored secret config in `.gitignore`.
   - Configured global Stitch design tokens and `Newsreader` + `Plus Jakarta Sans` fonts in `src/app/globals.css` and `src/app/layout.tsx`.
   - Implemented the responsive Landing Page UI in `src/app/(marketing)/page.tsx` and `src/components/features/marketing/*`.
+- **2026-11-05 — Milestone 3: Phase 1B Step 1 — Authentication UI Screens**
+  - Built shared 2-column Stitch auth layout (`src/app/(auth)/layout.tsx`) and editorial right-column showcase (`AuthEditorialPanel`).
+  - Implemented `/login`, `/signup`, `/forgot-password`, and `/reset-password` UI screens with interactive client-side validation, password visibility toggle, muted rose error alerts, and loading states.
 

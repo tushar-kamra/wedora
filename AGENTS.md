@@ -24,6 +24,8 @@ These rules apply across the entire **Wedora** repository and must be followed i
    - Strictly adhere to Wedora V1 product boundaries defined in `docs/PRD.md` (do not introduce non-V1 features like hotel room allocation, flight tracking, or payment installment schedules).
 3. **Reuse the Global Stitch Design System:**
    - All UI screens must use the global Stitch color tokens, spacing scale, and typography utilities (`Newsreader` headlines + `Plus Jakarta Sans` body/labels) defined in [`src/app/globals.css`](./src/app/globals.css) and [`src/app/layout.tsx`](./src/app/layout.tsx).
-4. **Secret & Credential Safety:**
+4. **Browser & End-to-End Flow Verification:**
+   - Whenever any UI screen or feature is built or updated, run the app in the browser (`http://localhost:3000`) and thoroughly test every user flow and edge case (navigation links, empty/invalid/valid form states, interactive controls, and error/success states) before considering the feature complete.
+5. **Secret & Credential Safety:**
    - Never commit `.env*`, `.vscode/mcp.json`, `.agents/plugins/stitch/mcp_config.json`, or raw API keys/tokens to Git.
 
