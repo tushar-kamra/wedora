@@ -14,7 +14,8 @@ export type ApiErrorCode =
   | 'ALREADY_HAS_WEDDING'
   | 'LAST_ADMIN'
   | 'GUEST_LIMIT_EXCEEDED'
-  | 'INVITATION_ALREADY_ACCEPTED';
+  | 'INVITATION_ALREADY_ACCEPTED'
+  | 'INVITATION_EMAIL_MISMATCH';
 
 export interface ApiSuccessResponse<T> {
   data: T;
